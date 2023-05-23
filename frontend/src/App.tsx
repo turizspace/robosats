@@ -11,23 +11,26 @@ import i18n from './i18n/Web';
 
 import { systemClient } from './services/System';
 import ErrorBoundary from './components/ErrorBoundary';
+import PerformanceBenchmark from './components/Benchmark';
 
 const App = (): JSX.Element => {
   const store = useAppStore();
   return (
     <StrictMode>
       <ErrorBoundary>
-        <Suspense fallback='loading'>
-          <I18nextProvider i18n={i18n}>
-            <AppContext.Provider value={store}>
-              <ThemeProvider theme={store.theme}>
-                <CssBaseline />
-                {window.NativeRobosats === undefined ? <UnsafeAlert /> : <TorConnectionBadge />}
-                <Main />
-              </ThemeProvider>
-            </AppContext.Provider>
-          </I18nextProvider>
-        </Suspense>
+          <Suspense fallback='loading'>
+            <I18nextProvider i18n={i18n}>
+              <AppContext.Provider value={store}>
+                <ThemeProvider theme={store.theme}>
+                  <CssBaseline />
+                  {window.NativeRobosats === undefined ? <UnsafeAlert /> : <TorConnectionBadge />}
+                  <PerformanceBenchmark>
+                    <Main />
+                  </PerformanceBenchmark>
+                </ThemeProvider>
+              </AppContext.Provider>
+            </I18nextProvider>
+          </Suspense>
       </ErrorBoundary>
     </StrictMode>
   );

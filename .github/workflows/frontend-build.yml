@@ -47,7 +47,7 @@ jobs:
     - name:  'Build'
       run: |
         cd frontend
-        npm run build
+        npm run dev
     - name: 'Archive Web Basic Build Results'
       uses: actions/upload-artifact@v3.1.2
       with:
@@ -66,15 +66,15 @@ jobs:
 
     # Invoke pre-release image build if this was not a tag push
     # Docker images tagged only with short commit hash
-    - name: 'Invoke Coodinator Image CI'
-      if: inputs.semver == ''
-      uses: benc-uk/workflow-dispatch@v121
-      with:
-        workflow: 'Docker: Coordinator'
-        token: ${{ secrets.PERSONAL_TOKEN }}
-    - name: 'Invoke Client App Build CI/CD workflow'
-      if: inputs.semver == ''
-      uses: benc-uk/workflow-dispatch@v121
-      with:
-        workflow: 'Docker: Client'
-        token: ${{ secrets.PERSONAL_TOKEN }}
+    # - name: 'Invoke Coodinator Image CI'
+    #   if: inputs.semver == ''
+    #   uses: benc-uk/workflow-dispatch@v121
+    #   with:
+    #     workflow: 'Docker: Coordinator'
+    #     token: ${{ secrets.PERSONAL_TOKEN }}
+    # - name: 'Invoke Client App Build CI/CD workflow'
+    #   if: inputs.semver == ''
+    #   uses: benc-uk/workflow-dispatch@v121
+    #   with:
+    #     workflow: 'Docker: Client'
+    #     token: ${{ secrets.PERSONAL_TOKEN }}
