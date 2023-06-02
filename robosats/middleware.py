@@ -167,3 +167,14 @@ class TokenAuthMiddleware(BaseMiddleware):
             scope["user"] if token_key is None else await get_user(token_key)
         )
         return await super().__call__(scope, receive, send)
+
+
+class CORSMiddleware(object):
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        response["Access-Control-Allow-Origin"] = "*"
+
+        return response

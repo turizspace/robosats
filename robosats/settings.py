@@ -159,6 +159,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "robosats.middleware.CORSMiddleware",
     "django.middleware.common.CommonMiddleware",
 ]
 
