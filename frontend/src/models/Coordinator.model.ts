@@ -20,7 +20,7 @@ export interface Version {
 
 export interface Badges {
   isFounder?: boolean | undefined;
-  donatesToDevFund?: number | undefined;
+  donatesToDevFund: number;
   hasGoodOpSec?: boolean | undefined;
   robotsLove?: boolean | undefined;
   hasLargeLimits?: boolean | undefined;
@@ -82,7 +82,7 @@ export class Coordinator {
   public color: string;
   public policies: Record<string, string> = {};
   public contact: Contact | undefined;
-  public badges?: Badges | undefined;
+  public badges: Badges;
   public mainnet: Origins;
   public testnet: Origins;
   public mainnetNodesPubkeys: string[] | undefined;
@@ -98,5 +98,7 @@ export class Coordinator {
   public robot?: Robot | undefined = undefined;
   public loadingRobot: boolean = true;
 }
+
+export type Federation = Record<string, Coordinator>;
 
 export default Coordinator;
