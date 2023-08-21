@@ -6,7 +6,6 @@ from channels.middleware import BaseMiddleware
 from django.conf import settings
 from django.contrib.auth.models import AnonymousUser, User, update_last_login
 from django.utils.deprecation import MiddlewareMixin
-from django.db import IntegrityError
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import AuthenticationFailed
 from robohash import Robohash
@@ -50,6 +49,27 @@ class SplitAuthorizationHeaderMiddleware(MiddlewareMixin):
             request.META["PUBLIC_KEY"] = split_auth[1]
             request.META["ENCRYPTED_PRIVATE_KEY"] = split_auth[2]
 
+class SplitAuthorizationHeaderMiddleware(MiddlewareMixin):
+    """
+    This middleware splits the HTTP_AUTHORIZATION, leaves on it only the `Token ` and creates
+    two new META headers for both PGP keys.
+
+    Given that API calls to a RoboSats API might be made from other host origin,
+    there is a high chance browsers will not attach cookies and other sensitive information.
+    Therefore, we are using the `HTTP_AUTHORIZATION` header to also embded the needed robot
+    pubKey and encPrivKey to create a new robot in the coordinator on the first request.
+    """
+
+    def process_request(self, request):
+        auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+        split_auth = auth_header.split(" | ")
+
+        if len(split_auth) == 3:
+            request.META["HTTP_AUTHORIZATION"] = split_auth[0]
+            request.META["PUBLIC_KEY"] = split_auth[1]
+            request.META["ENCRYPTED_PRIVATE_KEY"] = split_auth[2]
+
+
 class RobotTokenSHA256AuthenticationMiddleWare:
     """
     Builds on django-rest-framework Token Authentication.
@@ -66,7 +86,6 @@ class RobotTokenSHA256AuthenticationMiddleWare:
         self.get_response = get_response
 
     def __call__(self, request):
-
         token_sha256_b91 = request.META.get("HTTP_AUTHORIZATION", "").replace(
             "Token ", ""
         )
@@ -109,7 +128,6 @@ class RobotTokenSHA256AuthenticationMiddleWare:
                 raise AuthenticationFailed(
                     "On the first request to a RoboSats coordinator, you must provide as well a valid public and encrypted private PGP keys"
                 )
-
             (
                 valid,
                 bad_keys_context,
@@ -142,7 +160,6 @@ class RobotTokenSHA256AuthenticationMiddleWare:
             # Generate avatar. Does not replace if existing.
             image_path = avatar_path.joinpath(nickname + ".webp")
             if not image_path.exists():
-
                 rh = Robohash(hash)
                 rh.assemble(roboset="set1", bgset="any")  # for backgrounds ON
                 with open(image_path, "wb") as f:
@@ -189,3 +206,22 @@ class TokenAuthMiddleware(BaseMiddleware):
             scope["user"] if token_key is None else await get_user(token_key)
         )
         return await super().__call__(scope, receive, send)
+
+
+# This is a practical replacement to SplitAuthorizationHeaderMiddleware
+# class HeadersRefactorMiddleware:
+#     def __init__(self, get_response):
+#         self.get_response = get_response
+
+#     def __call__(self, request):
+#         auth_header = request.META.get("HTTP_AUTHORIZATION", "")
+#         auth_parts = auth_header.split(" | ")
+#         if len(auth_parts) == 3:
+#             request.META["HTTP_AUTHORIZATION"] = auth_parts[0]
+#             request.META["Public_key"] = auth_parts[1]
+#             request.META["Encrypted_private_key"] = auth_parts[2]
+
+#             print("HEADERS HAVE BEEN REFACTORED!")
+
+#         response = self.get_response(request)
+#         return response
